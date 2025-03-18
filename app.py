@@ -16,6 +16,13 @@ def create_teams_and_evaluators(df: pd.DataFrame) -> tuple[list[Team], list[User
         if not any(u.name == evaluator.name for u in evaluators):
             evaluators.append(evaluator)
 
+
+    # for e in teams_cell_content:
+    #     print(e)
+
+    # for n in evaluators: 
+    #     print(n)
+
     teams: list[Team] = []
     for elm in teams_cell_content:
         nomes = elm.split(",")  # Split into two parts
@@ -29,12 +36,12 @@ def create_teams_and_evaluators(df: pd.DataFrame) -> tuple[list[Team], list[User
     return teams, evaluators
 
 
-def generate_grades_from_team(df: pd.DataFrame, team: Team, evaluators: list[User]):
+def generate_grades_from_team(df: pd.DataFrame, team: Team, evaluators: list[User], teams_evaluators: list[Team]):
     for _, row in df.iterrows():
         if row["Qual equipe você está avaliando:"].__contains__(str(team.id)):
             total = 0
 
-            for grade in row.iloc[7:13]:
+            for grade in row.iloc[8:14]:
                 total += grade
 
             avg = total / 6
@@ -42,11 +49,12 @@ def generate_grades_from_team(df: pd.DataFrame, team: Team, evaluators: list[Use
             for e in evaluators:
                 if e.name == row["Name"]:
                     e.teams_evaluated.append(team)
+        evaluator = row['Identifique qual é a sua equipe:']
 
 
 def generate_all_grades(df: pd.DataFrame, teams: list[Team], evaluators: list[User]):
     for t in teams:
-        generate_grades_from_team(df, t, evaluators)
+        generate_grades_from_team(df, t, evaluators, teams)
 
 
 def get_avg_from_teams(teams: list[Team]):
@@ -58,9 +66,15 @@ def get_avg_from_teams(teams: list[Team]):
         t.average = total / len(t.grades)
 
 
+def generate_content_users(teams: list[Team]):
+    for t in teams:
+        for m in t.members:
+            m.content = (t.average + (m.professorGrade * 5)) / 6
+
+
 def main():
     df = pd.read_excel(
-        "/home/hetzwga/Downloads/IA SIS_ Avaliação dos Painéis TESTE MARLON(1-2).xlsx"
+        "/home/hetzwga/Downloads/IA SIS_ Avaliação dos Painéis TESTE MARLON(1-4).xlsx"
     )
 
     teams, users = create_teams_and_evaluators(df)
@@ -69,21 +83,27 @@ def main():
 
     get_avg_from_teams(teams)
 
-    # for t in teams:
-    #     print(t.id)
-    #     print(t.grades)
-    #     print(t.average)
-    #     print("")
+    for t in teams:
+        print(t.id)
+        print(t.grades)
+        print(t.average)
+        print("")
 
     # for u in users:
     #     print(u.name)
 
-    for u in users:
-        print("User:", u.name, "avaliou as equipes: ")
-        for t in u.teams_evaluated:
-            print(t.id)
-            for m in t.members:
-                print(m.name)
-            print("")
+    # for u in users:
+    #     print("User:", u.name, "avaliou as equipes: ")
+    #     for t in u.teams_evaluated:
+    #         print(t.id)
+    #         for m in t.members:
+    #             print(m.name)
+    #         print("")
+
+    generate_content_users(teams)
+
+
+    # for t in teams:
+
 
 main()
