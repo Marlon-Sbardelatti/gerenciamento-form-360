@@ -3,27 +3,36 @@ from models.team import Team
 from models.user import User
 
 
-def create_teams_and_evaluators(df: pd.DataFrame) -> tuple[list[Team], list[User]]:
+def create_teams_and_evaluators(df: pd.DataFrame) -> tuple[list[Team], list[Team]]:
     teams_cell_content: list[str] = []
-    evaluators: list[User] = []
+    # evaluators: list[User] = []
+    evaluators_cell_content: list[str] = []
+
     for _, row in df.iterrows():
+        if not (
+            evaluators_cell_content.__contains__(
+                row["Identifique qual é a sua equipe:"]
+            )
+        ):
+            evaluators_cell_content.append(row["Identifique qual é a sua equipe:"])
+
         if not (
             teams_cell_content.__contains__(row["Qual equipe você está avaliando:"])
         ):
             teams_cell_content.append(row["Qual equipe você está avaliando:"])
 
-        evaluator = User(row["Name"])
-        if not any(u.name == evaluator.name for u in evaluators):
-            evaluators.append(evaluator)
-
+        # evaluator = User(row["Name"])
+        # if not any(u.name == evaluator.name for u in evaluators):
+        #     evaluators.append(evaluator)
 
     # for e in teams_cell_content:
     #     print(e)
 
-    # for n in evaluators: 
+    # for n in evaluators_cell_content:
     #     print(n)
 
     teams: list[Team] = []
+    evaluators: list[Team] = []
     for elm in teams_cell_content:
         nomes = elm.split(",")  # Split into two parts
         first_nome_content = nomes[0].split(" ", 3)
@@ -33,10 +42,19 @@ def create_teams_and_evaluators(df: pd.DataFrame) -> tuple[list[Team], list[User
         user3 = User(nomes[2].strip())
         teams.append(Team(int(id), [user1, user2, user3]))
 
+    for elm in evaluators_cell_content:
+        nomes = elm.split(",")  # Split into two parts
+        first_nome_content = nomes[0].split(" ", 3)
+        id = first_nome_content[1]
+        user1 = User(first_nome_content[3].strip())
+        user2 = User(nomes[1].strip())
+        user3 = User(nomes[2].strip())
+        evaluators.append(Team(int(id), [user1, user2, user3]))
+
     return teams, evaluators
 
 
-def generate_grades_from_team(df: pd.DataFrame, team: Team, evaluators: list[User], teams_evaluators: list[Team]):
+def generate_grades_from_team(df: pd.DataFrame, team: Team, evaluators: list[Team]):
     for _, row in df.iterrows():
         if row["Qual equipe você está avaliando:"].__contains__(str(team.id)):
             total = 0
@@ -45,16 +63,27 @@ def generate_grades_from_team(df: pd.DataFrame, team: Team, evaluators: list[Use
                 total += grade
 
             avg = total / 6
-            team.grades.append((row["Name"], avg))
+            id = [
+                int(i)
+                for i in str(row["Identifique qual é a sua equipe:"]).split()
+                if i.isdigit()
+            ]
+
+            team.grades.append((id[0], avg))
+
+            evaluator = row["Identifique qual é a sua equipe:"]
+            nomes = str(evaluator).split(",")
+            first_nome_content = nomes[0].split(" ", 3)
+            id = first_nome_content[1]
+
             for e in evaluators:
-                if e.name == row["Name"]:
-                    e.teams_evaluated.append(team)
-        evaluator = row['Identifique qual é a sua equipe:']
+                if e.id == int(id):
+                    e.evaluated_teams.append(team)
 
 
-def generate_all_grades(df: pd.DataFrame, teams: list[Team], evaluators: list[User]):
+def generate_all_grades(df: pd.DataFrame, teams: list[Team], evaluators: list[Team]):
     for t in teams:
-        generate_grades_from_team(df, t, evaluators, teams)
+        generate_grades_from_team(df, t, evaluators)
 
 
 def get_avg_from_teams(teams: list[Team]):
@@ -77,20 +106,17 @@ def main():
         "/home/hetzwga/Downloads/IA SIS_ Avaliação dos Painéis TESTE MARLON(1-4).xlsx"
     )
 
-    teams, users = create_teams_and_evaluators(df)
+    teams, evaluators = create_teams_and_evaluators(df)
 
-    generate_all_grades(df, teams, users)
+    generate_all_grades(df, teams, evaluators)
 
     get_avg_from_teams(teams)
 
     for t in teams:
-        print(t.id)
-        print(t.grades)
-        print(t.average)
-        print("")
-
-    # for u in users:
-    #     print(u.name)
+        print("ID da equipe:", t.id)
+        print("Notas:", t.grades)
+        print("Média:", t.average)
+        print("Desvio:", t.deviation)
 
     # for u in users:
     #     print("User:", u.name, "avaliou as equipes: ")
@@ -102,8 +128,40 @@ def main():
 
     generate_content_users(teams)
 
+    for e in evaluators:
+        print("Evaluator", e.id, "avaliou os teams:")
+        own_grades = 0
+        own_count = 0
+        count = 0
+        total = 0
+        for t in e.evaluated_teams:
+            print(t.id)
+            inner_count = 0
+            inner_total = 0
+            for g in t.grades:
+                if g[0] != e.id:
+                    inner_total += g[1]
+                    inner_count += 1
+                else:
+                    own_grades += g[1]
+                    own_count += 1
+            others_team_avg = inner_total / inner_count
+            count += 1
+            total += others_team_avg
+            # print("avg:", others_team_avg)
+        all_others_team_avg = total / count
+        own_avg = own_grades / own_count
+        deviation = (all_others_team_avg + own_avg) / 2
+        e.deviation = deviation
+        # print("own avg :", own_avg)
+        # print("all others avg:", all_others_team_avg)
+        print("")
 
-    # for t in teams:
+    for e in evaluators:
+        print("ID da equipe:", e.id)
+        print("Notas:", e.grades)
+        print("Média:", e.average)
+        print("Desvio:", e.deviation)
 
 
 main()
