@@ -5,7 +5,6 @@ from models.user import User
 
 def create_teams_and_evaluators(df: pd.DataFrame) -> tuple[list[Team], list[Team]]:
     teams_cell_content: list[str] = []
-    # evaluators: list[User] = []
     evaluators_cell_content: list[str] = []
 
     for _, row in df.iterrows():
@@ -20,16 +19,6 @@ def create_teams_and_evaluators(df: pd.DataFrame) -> tuple[list[Team], list[Team
             teams_cell_content.__contains__(row["Qual equipe você está avaliando:"])
         ):
             teams_cell_content.append(row["Qual equipe você está avaliando:"])
-
-        # evaluator = User(row["Name"])
-        # if not any(u.name == evaluator.name for u in evaluators):
-        #     evaluators.append(evaluator)
-
-    # for e in teams_cell_content:
-    #     print(e)
-
-    # for n in evaluators_cell_content:
-    #     print(n)
 
     teams: list[Team] = []
     evaluators: list[Team] = []
@@ -101,33 +90,7 @@ def generate_content_users(teams: list[Team]):
             m.content = (t.average + (m.professorGrade * 5)) / 6
 
 
-def main():
-    df = pd.read_excel(
-        "/home/hetzwga/Downloads/IA SIS_ Avaliação dos Painéis TESTE MARLON(1-4).xlsx"
-    )
-
-    teams, evaluators = create_teams_and_evaluators(df)
-
-    generate_all_grades(df, teams, evaluators)
-
-    get_avg_from_teams(teams)
-
-    for t in teams:
-        print("ID da equipe:", t.id)
-        print("Notas:", t.grades)
-        print("Média:", t.average)
-        print("Desvio:", t.deviation)
-
-    # for u in users:
-    #     print("User:", u.name, "avaliou as equipes: ")
-    #     for t in u.teams_evaluated:
-    #         print(t.id)
-    #         for m in t.members:
-    #             print(m.name)
-    #         print("")
-
-    generate_content_users(teams)
-
+def generate_deviations(evaluators: list[Team]):
     for e in evaluators:
         print("Evaluator", e.id, "avaliou os teams:")
         own_grades = 0
@@ -148,14 +111,39 @@ def main():
             others_team_avg = inner_total / inner_count
             count += 1
             total += others_team_avg
-            # print("avg:", others_team_avg)
         all_others_team_avg = total / count
         own_avg = own_grades / own_count
         deviation = (all_others_team_avg + own_avg) / 2
         e.deviation = deviation
-        # print("own avg :", own_avg)
-        # print("all others avg:", all_others_team_avg)
+        print("own avg :", own_avg)
+        print("all others avg:", all_others_team_avg)
         print("")
+
+
+def main():
+    df = pd.read_excel(
+        "/home/hetzwga/Downloads/IA SIS_ Avaliação dos Painéis TESTE MARLON(1-5).xlsx"
+    )
+
+    teams, evaluators = create_teams_and_evaluators(df)
+
+    generate_all_grades(df, teams, evaluators)
+
+    get_avg_from_teams(teams)
+
+    for t in teams:
+        print("ID da equipe:", t.id)
+        print("Notas:", t.grades)
+        print("Média:", t.average)
+        print("Desvio:", t.deviation)
+
+    generate_content_users(teams)
+
+    # for t in teams:
+    #     for m in t.members:
+    #         print(m.name, m.professorGrade)
+
+    generate_deviations(evaluators)
 
     for e in evaluators:
         print("ID da equipe:", e.id)
