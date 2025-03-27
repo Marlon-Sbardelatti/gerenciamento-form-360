@@ -5,4 +5,5 @@ class Team:
         self.evaluated_teams: list = []
         self.grades: list = []
         self.average: float = 0.0
+        self.avaliatorGrade: float = 10
         self.deviation: float = 0.0
