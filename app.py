@@ -24,21 +24,25 @@ def create_teams_and_evaluators(df: pd.DataFrame) -> tuple[list[Team], list[Team
     teams: list[Team] = []
     evaluators: list[Team] = []
     for elm in teams_cell_content:
-        nomes = elm.split(",") 
-        first_nome_content = nomes[0].split(" ", 3)
-        id = first_nome_content[1]
-        user1 = User(first_nome_content[3].strip())
-        user2 = User(nomes[1].strip())
-        user3 = User(nomes[2].strip())
+        nomes = elm.split(": ")
+
+        first_nome_content = nomes[1].split(", ", 3)
+        print(first_nome_content)
+        id = nomes[0].split("E", 1)[1]
+        print(id)
+        user1 = User(first_nome_content[0].strip())
+        user2 = User(first_nome_content[1].strip())
+        user3 = User(first_nome_content[2].split(".", 1)[0].strip())
         teams.append(Team(int(id), [user1, user2, user3]))
 
     for elm in evaluators_cell_content:
-        nomes = elm.split(",")  
-        first_nome_content = nomes[0].split(" ", 3)
-        id = first_nome_content[1]
-        user1 = User(first_nome_content[3].strip())
-        user2 = User(nomes[1].strip())
-        user3 = User(nomes[2].strip())
+        nomes = elm.split(": ")  
+        first_nome_content = nomes[1].split(", ", 3)
+        print(first_nome_content)
+        id = nomes[0].split("E", 1)[1]
+        user1 = User(first_nome_content[0].strip())
+        user2 = User(first_nome_content[1].strip())
+        user3 = User(first_nome_content[2].split(".", 1)[0].strip())
         evaluators.append(Team(int(id), [user1, user2, user3]))
 
     return teams, evaluators
@@ -59,6 +63,7 @@ def generate_grades_from_team(df: pd.DataFrame, team: Team, evaluators: list[Tea
                 for i in str(row["Identifique qual é a sua equipe:"]).split()
                 if i.isdigit()
             ]
+            print(id)
 
             team.grades.append((id[0], avg))
 
@@ -92,7 +97,6 @@ def generate_content_users(teams: list[Team]):
             m.content = (t.average + (m.professorGrade * 5)) / 6
 
 
-
 def calculate_evaluator_grades(evaluators: list[Team], teams: list[Team]):
     for e in evaluators:
         if not e.evaluated_teams:
@@ -116,6 +120,7 @@ def calculate_evaluator_grades(evaluators: list[Team], teams: list[Team]):
             e.avaliatorGrade = max(10 - deviation, 0) 
 
             print(f"Evaluator {e.id} - Given Avg: {avg_given}, Real Avg: {avg_real}, Adjusted Grade: {e.avaliatorGrade}")
+
 
             for t in teams:
                 if t.id == e.id:
@@ -141,25 +146,56 @@ def save_final_grades_to_csv(teams: list[Team], filename="final_grades.csv"):
 
     for t in teams:
         for m in t.members:
-            students.append((m.name, m.finalGrade))
+            students.append({
+                "name": m.name,
+                "team_avg": t.avaliatorGrade,
+                "professor_grade": m.professorGrade,
+                "final_grade": m.finalGrade,
+            })
 
-    students.sort(key=lambda x: x[0])
+    students.sort(key=lambda x: x["name"])
 
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file, delimiter=";")  
-        writer.writerow(["Nome", "Nota Final"]) 
+        writer = csv.writer(file, delimiter=";")
+        writer.writerow(["Nome", "Media da Equipe", "Nota do Professor", "Nota Final"])
 
-        for name, final_grade in students:
-            writer.writerow([name, f"{final_grade:.2f}"]) 
+        for student in students:
+            writer.writerow([
+                student["name"],
+                f"{student['team_avg']:.2f}" if student["team_avg"] is not None else "",
+                f"{student['professor_grade']:.2f}" if student["professor_grade"] is not None else "",
+                f"{student['final_grade']:.2f}" if student["final_grade"] is not None else "",
+            ])
 
-    print(f"Arquivo '{filename}' salvo com sucesso!")
+    print(f"✅ Arquivo '{filename}' salvo com sucesso!")
+
+
+def assign_professor_grades(teams: list[Team], filename: str):
+    df_prof = pd.read_excel(filename)
+
+    name_grade_map = {}
+
+    for col in df_prof.columns[5:-1]:
+        student_name = str(col).strip().lower().replace("\n", " ")
+        grade = df_prof.iloc[0][col]
+        if pd.notna(grade):
+            name_grade_map[student_name] = float(grade)
+
+    for t in teams:
+        for member in t.members:
+            name_key = member.name.strip().lower()
+            if name_key in name_grade_map:
+                member.professorGrade = name_grade_map[name_key]
+            else:
+                print(f"⚠️ Nota de professor não encontrada para {member.name}")
+
 
 
 
 
 def main():
     df = pd.read_excel(
-        "C:/Users/User/Downloads/IA SIS_ Avaliação dos Painéis TESTE MARLON(1-4).xlsx"
+        "C:/Users/User/Downloads/IA SIS_ Avaliação dos Painéis (TESTE)(1-6).xlsx"
     )
 
     teams, evaluators = create_teams_and_evaluators(df)
@@ -168,13 +204,19 @@ def main():
 
     get_avg_from_teams(teams)
 
+    assign_professor_grades(teams, "C:/Users/User/Downloads/IA BCC_ PROFESSOR - Avaliação dos Painéis TESTE MARLON (1-1).xlsx")  # <- aqui
+
     generate_content_users(teams)
 
-    calculate_evaluator_grades(evaluators, teams) 
+    calculate_evaluator_grades(evaluators, teams)
 
     calculate_final_grades(teams)
 
     save_final_grades_to_csv(teams)
+
+    for t in teams:
+       for m in t.members:
+            print(f"Nome: {m.name}, Nota do prof: {m.professorGrade}")
 
 main()
 	
