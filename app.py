@@ -24,25 +24,21 @@ def create_teams_and_evaluators(df: pd.DataFrame) -> tuple[list[Team], list[Team
     teams: list[Team] = []
     evaluators: list[Team] = []
     for elm in teams_cell_content:
-        nomes = elm.split(": ")
-
-        first_nome_content = nomes[1].split(", ", 3)
-        print(first_nome_content)
-        id = nomes[0].split("E", 1)[1]
-        print(id)
-        user1 = User(first_nome_content[0].strip())
-        user2 = User(first_nome_content[1].strip())
-        user3 = User(first_nome_content[2].split(".", 1)[0].strip())
+        nomes = elm.split(",") 
+        first_nome_content = nomes[0].split(" ", 3)
+        id = first_nome_content[1]
+        user1 = User(first_nome_content[3].strip())
+        user2 = User(nomes[1].strip())
+        user3 = User(nomes[2].strip())
         teams.append(Team(int(id), [user1, user2, user3]))
 
     for elm in evaluators_cell_content:
-        nomes = elm.split(": ")  
-        first_nome_content = nomes[1].split(", ", 3)
-        print(first_nome_content)
-        id = nomes[0].split("E", 1)[1]
-        user1 = User(first_nome_content[0].strip())
-        user2 = User(first_nome_content[1].strip())
-        user3 = User(first_nome_content[2].split(".", 1)[0].strip())
+        nomes = elm.split(",")  
+        first_nome_content = nomes[0].split(" ", 3)
+        id = first_nome_content[1]
+        user1 = User(first_nome_content[3].strip())
+        user2 = User(nomes[1].strip())
+        user3 = User(nomes[2].strip())
         evaluators.append(Team(int(id), [user1, user2, user3]))
 
     return teams, evaluators
@@ -63,7 +59,6 @@ def generate_grades_from_team(df: pd.DataFrame, team: Team, evaluators: list[Tea
                 for i in str(row["Identifique qual é a sua equipe:"]).split()
                 if i.isdigit()
             ]
-            print(id)
 
             team.grades.append((id[0], avg))
 
