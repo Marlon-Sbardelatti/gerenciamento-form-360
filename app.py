@@ -23,23 +23,56 @@ def create_teams_and_evaluators(df: pd.DataFrame) -> tuple[list[Team], list[Team
 
     teams: list[Team] = []
     evaluators: list[Team] = []
+
     for elm in teams_cell_content:
-        nomes = elm.split(",") 
+        nomes = elm.split(",")
+
         first_nome_content = nomes[0].split(" ", 3)
         id = first_nome_content[1]
         user1 = User(first_nome_content[3].strip())
-        user2 = User(nomes[1].strip())
-        user3 = User(nomes[2].strip())
-        teams.append(Team(int(id), [user1, user2, user3]))
+
+        user2 = None
+        if len(nomes) > 1:
+            user2_name = nomes[1].strip()
+            if " - " in user2_name:
+                user2_name = user2_name.split(" - ")[0].strip()
+            user2 = User(user2_name)
+
+        user3 = None
+        if len(nomes) > 2:
+            user3_name = nomes[2].strip()
+            if " - " in user3_name:
+                user3_name = user3_name.split(" - ")[0].strip()
+            user3 = User(user3_name)
+
+        members = [u for u in [user1, user2, user3] if u is not None]
+        teams.append(Team(int(id), members))
+
+
 
     for elm in evaluators_cell_content:
-        nomes = elm.split(",")  
+        nomes = elm.split(",")
+
         first_nome_content = nomes[0].split(" ", 3)
         id = first_nome_content[1]
         user1 = User(first_nome_content[3].strip())
-        user2 = User(nomes[1].strip())
-        user3 = User(nomes[2].strip())
-        evaluators.append(Team(int(id), [user1, user2, user3]))
+
+        user2 = None
+        if len(nomes) > 1:
+            user2_name = nomes[1].strip()
+            if " - " in user2_name:
+                user2_name = user2_name.split(" - ")[0].strip()
+            user2 = User(user2_name)
+
+        user3 = None
+        if len(nomes) > 2:
+            user3_name = nomes[2].strip()
+            if " - " in user3_name:
+                user3_name = user3_name.split(" - ")[0].strip()
+            user3 = User(user3_name)
+    
+        evaluators_ = [u for u in [user1, user2, user3] if u is not None]
+        evaluators.append(Team(int(id), evaluators_))
 
     return teams, evaluators
 
@@ -137,22 +170,24 @@ def calculate_final_grades(teams: list[Team]):
 
 
 def save_final_grades_to_csv(teams: list[Team], filename="final_grades.csv"):
-    students = []
+    students_dict = {}
 
     for t in teams:
         for m in t.members:
-            students.append({
-                "name": m.name,
+            name_key = m.name.strip().lower()
+            students_dict[name_key] = {
+                "name": m.name.strip(),
                 "team_avg": t.avaliatorGrade,
                 "professor_grade": m.professorGrade,
                 "final_grade": m.finalGrade,
-            })
+            }
 
+    students = list(students_dict.values())
     students.sort(key=lambda x: x["name"])
 
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file, delimiter=";")
-        writer.writerow(["Nome", "Media da Equipe", "Nota do Professor", "Nota Final"])
+        writer.writerow(["Nome", "Média da Equipe", "Nota do Professor", "Nota Final"])
 
         for student in students:
             writer.writerow([
@@ -162,7 +197,12 @@ def save_final_grades_to_csv(teams: list[Team], filename="final_grades.csv"):
                 f"{student['final_grade']:.2f}" if student["final_grade"] is not None else "",
             ])
 
+        writer.writerow([])
+        writer.writerow(["Cálculo da Nota"])
+        writer.writerow(["Nota Final = Média da Equipe * 0.4 + Nota do Professor * 0.6"])
+
     print(f"✅ Arquivo '{filename}' salvo com sucesso!")
+
 
 
 def assign_professor_grades(teams: list[Team], filename: str):
@@ -190,7 +230,7 @@ def assign_professor_grades(teams: list[Team], filename: str):
 
 def main():
     df = pd.read_excel(
-        "C:/Users/User/Downloads/IA SIS_ Avaliação dos Painéis (TESTE)(1-6).xlsx"
+        "C:/Users/User/Downloads/IA SIS_ Avaliação dos Painéis(1-149).xlsx"
     )
 
     teams, evaluators = create_teams_and_evaluators(df)
@@ -199,7 +239,7 @@ def main():
 
     get_avg_from_teams(teams)
 
-    assign_professor_grades(teams, "C:/Users/User/Downloads/IA BCC_ PROFESSOR - Avaliação dos Painéis TESTE MARLON (1-1).xlsx")  # <- aqui
+    assign_professor_grades(teams, "C:/Users/User/Downloads/IA SIS_ PROFESSOR - Avaliação dos Painéis(1-1).xlsx")  # <- aqui
 
     generate_content_users(teams)
 

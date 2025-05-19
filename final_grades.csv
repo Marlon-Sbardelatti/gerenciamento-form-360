@@ -1,16 +1,47 @@
-Nome;Media da Equipe;Nota do Professor;Nota Final
-André Victor Duarte Zeni;9.67;10.00;9.72
-André Victor Duarte Zeni;9.67;10.00;9.72
-Beatriz Conrat Müller da Silva;9.67;10.00;9.72
-Beatriz Conrat Müller da Silva;9.67;10.00;9.72
-Firmo Guilherme Bernardo Vieira;9.25;10.00;9.60
-Guilherme Ian Klitzke;9.33;10.00;9.63
-Guilherme Ian Klitzke;9.33;10.00;9.63
-João Victor Morais Toureiro;9.25;10.00;9.60
-Lauro Pereira Neto Schautica. - Sistemas de Recomendação;9.67;10.00;9.72
-Lauro Pereira Neto Schautica. - Sistemas de Recomendação;9.67;10.00;9.72
-Leonardo Prado Suzin - IA Generativa;9.25;10.00;9.60
-Matheus Boing;9.33;10.00;9.63
-Matheus Boing;9.33;10.00;9.63
-Thyago Floriano – Sistemas Multiagentes;9.33;10.00;9.63
-Thyago Floriano – Sistemas Multiagentes;9.33;10.00;9.63
+Nome;Média da Equipe;Nota do Professor;Nota Final
+Amanda Victória Almeida Silva;9.85;10.00;9.90
+André Victor Duarte Zeni;9.56;9.00;9.23
+Augusto Klug de Abreu;9.98;10.00;9.89
+Beatriz Conrat Müller da Silva;9.56;10.00;9.73
+Bruno Junkes;9.28;7.00;8.05
+Carolina Mafra Sada;9.85;10.00;9.90
+Christian Azevedo;9.28;9.00;9.05
+Eduardo Lanzarin;9.28;10.00;9.55
+Eduardo Zirbell;9.39;10.00;9.66
+Felipe Babel;9.65;10.00;9.81
+Felipe Oliveira Mesquita de Souza;9.90;8.00;8.88
+Firmo Guilherme Bernardo Vieira;9.90;9.00;9.36
+Gabriel Kleine;9.90;10.00;9.88
+Gabriel da Silva Puff;8.53;9.00;8.84
+Guilherme Goedert Hoegen;9.92;8.00;8.91
+Guilherme Ian Klitzke;9.53;10.00;9.73
+Guilherme Kuhnen;9.39;10.00;9.66
+Guilherme Naumann;9.65;10.00;9.81
+Gustavo Arthur Haerthel;9.59;10.00;9.67
+Gustavo Richard Voss;9.59;9.00;9.17
+Helena Silva;9.92;10.00;9.91
+Jaíne Alves Andrade;9.90;10.00;9.88
+João Victor Morais Toureiro;9.90;7.00;8.36
+Kamilly Birkner;9.62;9.00;9.24
+Kauana Correia Flores;9.62;9.00;9.24
+Lauro Pereira Neto Schautica;9.56;9.00;9.23
+Leonardo Miguel Macaes;9.84;10.00;9.91
+Leonardo Prado Suzin;9.90;8.00;8.86
+Lucas Eduardo Testoni;9.39;10.00;9.66
+Lucas Elias Parisotto;9.98;10.00;9.89
+Luiz H. Bassani;9.84;8.00;8.91
+Matheus Boing;9.53;10.00;9.73
+Matheus Fritzen;8.53;10.00;9.34
+Matheus Tallmann;9.65;10.00;9.81
+Pedro Henning;9.92;9.00;9.41
+Pedro Henrique Teloeken;9.70;10.00;9.79
+Ralf Iran Domingues;9.70;10.00;9.79
+Rodrigo Leitzke;9.59;9.00;9.17
+Thiago Jung Morais;9.98;10.00;9.89
+Thyago Floriano;9.53;10.00;9.73
+Victor Kruger;9.70;10.00;9.79
+Winicios Ivan Ulrich;8.53;9.00;8.84
+Éricke R. Maas;9.84;10.00;9.91
+
+Cálculo da Nota
+Nota Final = Média da Equipe * 0.4 + Nota do Professor * 0.6
